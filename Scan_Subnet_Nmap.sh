@@ -1,5 +1,5 @@
 #!/bin/bash
-# Created this script to automate and organize nmap subnet scanning
+# Created this script to automate and organize nmap and httpx subnet scanning
 
 # Get user input for the target subnet/IP
 printf "What is the target subnet/IP address that you want to scan? "
@@ -26,6 +26,12 @@ printf "Do you want to scan UDP or TCP? "
 read protocol
 protocol=$(printf "$protocol" | tr '[:upper:]' '[:lower:]')
 
+# Get user input for httpx scan option
+printf "\nDo you want to use httpx to check if open ports are serving websites? "
+read httpx_scan
+httpx_scan=$(printf "$httpx_scan" | tr '[:upper:]' '[:lower:]')
+printf "Will run httpx scan\n\n"
+
 # Check what protocol user wants to use
 if [[ "$protocol" == "udp" || "$protocol" == "u" ]]; then
     protocol="-sU"
@@ -50,9 +56,14 @@ for ip in $(cat ../nmap_host-discovery|grep 'scan report' | awk '{print $5}');do
 mkdir step3_sCV && cd step3_sCV
 for ip in $(cat ../../nmap_host-discovery|grep 'scan report'|awk '{print $5}');do for ports in $(cat ../nmap_65k-ports_$ip|grep open|awk -F '/' '{print $1}'|sed -z 's/\n/,/g'|sed 's/,$//');do sudo nmap -Pn $ip $speed $protocol -p $ports -sCV -oN nmap_sCV_$ip;done;done
 
+# httpx scan to find ports that are serving websites 
+if [[ "$httpx_scan" == "yes" || "$httpx_scan" == "y" ]]; then
+    for ip in $(cat ../../nmap_host-discovery|grep 'scan report'|awk '{print $5}');do for ports in $(cat ../nmap_65k-ports_$ip|grep open|awk -F '/' '{print $1}'|sed -z 's/\n/,/g'|sed 's/,$//');do /opt/httpx -u $ip -p $ports -title -status-code -follow-redirects -ip -method -o httpx_output_$ip;done;done
+fi
+
 # Create a directory for each host discovered with open ports, and then move each nmap file output to the target directory.  This is helpful for organizing notes on large subnets
 mkdir all_targets && cd all_targets
-for ip in $(ls ../nmap*|awk -F '_' '{print $3}');do mkdir $ip && cp ../nmap_sCV_$ip $ip;done
+for ip in $(ls ../nmap*|awk -F '_' '{print $3}');do mkdir $ip && cp ../nmap_sCV_$ip ../httpx_output_$ip $ip;done
 
 # Clean up
 cd ../ && mv all_targets ../../../ && cd ../../../ && rm -rf step1_host-discovery
