@@ -21,8 +21,7 @@ else
     printf "Scan will run on $target.\n\n"
 
     # Get user input for speed option
-    printf "Do you want to add --min-rate=5000 to the nmap scans? (y/n)
-    If you are concerned about causing disruptions on a target, then do not use --min-rate=5000. "
+    printf "Do you want to add --min-rate=5000 to the nmap scans? (y/n) \nIf you are concerned about causing disruptions on a target, then do not use --min-rate=5000. "
     read speed
     speed=$(printf "$speed" | tr '[:upper:]' '[:lower:]')
 
