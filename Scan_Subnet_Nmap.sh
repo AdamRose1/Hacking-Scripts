@@ -59,7 +59,7 @@ else
 fi
 
 # nmap host discovery 
-# While UDP doesn't have a great way for host discovery, it is still important to run this first scan for UDP, because it will determine if the host is up based on scanning 1000 ports instead of scanning 65k ports on all hosts.  That will save a lot of time.
+# While UDP doesn't have a great way for host discovery, it is still important to run this first scan even if using protocol UDP, because it will determine if the host is up based on scanning 1000 ports instead of scanning 65k ports on all hosts.  That will save a lot of time.
 mkdir step1_host-discovery && cd step1_host-discovery
 sudo nmap $target $host_discovery $speed $protocol -oN nmap_host-discovery 
 
