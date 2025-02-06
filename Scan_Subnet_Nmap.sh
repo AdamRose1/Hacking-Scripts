@@ -1,46 +1,61 @@
 #!/bin/bash
 # Created this script to automate and organize nmap and httpx subnet scanning
 
-# Get user input for the target subnet/IP
-printf "What is the target subnet/IP address that you want to scan? "
-read target
-printf "Scan will run on $target.\n\n"
+# Ask the user if they want to use predefined values or be prompted for input. If predefined, user has to update the predefined values for target,speed,protocol,host_discovery, and httpx_scan.
+printf "Do you want to use predefined values and skip the questions? (y/n): "
+read use_predefined
+use_predefined=$(printf "$use_predefined" | tr '[:upper:]' '[:lower:]')
+if [[ "$use_predefined" == "y" || "$use_predefined" == "yes" ]]; then
 
-# Get user input for speed option
-printf "Do you want to add --min-rate=5000 to the nmap scans? (y/n)
-If you are concerned about causing disruptions on a target, then do not use --min-rate=5000. "
-read speed
-speed=$(printf "$speed" | tr '[:upper:]' '[:lower:]')
-
-# Check if the user wants to use --min-rate=5000
-if [[ "$speed" == "y" || "$speed" == "yes" ]]; then
-    speed="--min-rate=5000"
-    printf "Nmap will scan with --min-rate=5000.\n\n"
-else
-    speed=""
-    printf "Nmap will use default speed scan, it will not add --min-rate=5000.\n\n"
-fi
-
-# Get user input for protocol option
-printf "Do you want to scan UDP or TCP? "
-read protocol
-protocol=$(printf "$protocol" | tr '[:upper:]' '[:lower:]')
-
-# Get user input for httpx scan option
-printf "\nDo you want to use httpx to check if open ports are serving websites? "
-read httpx_scan
-httpx_scan=$(printf "$httpx_scan" | tr '[:upper:]' '[:lower:]')
-printf "Will run httpx scan\n\n"
-
-# Check what protocol user wants to use
-if [[ "$protocol" == "udp" || "$protocol" == "u" ]]; then
-    protocol="-sU"
-    host_discovery="" 
-    printf "Starting UDP scan.\n\n"
-else
-    protocol=""
+    target="-iL /full/path/inscope.txt"
+    speed="--min-rate=1000"
+    protocol=""  # Leave empty if you want to use TCP. For UDP enter -sU here.
     host_discovery="-sn"
-    printf "Starting TCP scan.\n\n"
+    httpx_scan="yes"
+
+    printf "Using predefined values. Skipping prompts...\n\n"
+else
+    # Get user input for the target subnet/IP
+    printf "What is the target subnet/IP address that you want to scan? "
+    read target
+    printf "Scan will run on $target.\n\n"
+
+    # Get user input for speed option
+    printf "Do you want to add --min-rate=5000 to the nmap scans? (y/n)
+    If you are concerned about causing disruptions on a target, then do not use --min-rate=5000. "
+    read speed
+    speed=$(printf "$speed" | tr '[:upper:]' '[:lower:]')
+
+    # Check if the user wants to use --min-rate=5000
+    if [[ "$speed" == "y" || "$speed" == "yes" ]]; then
+        speed="--min-rate=5000"
+        printf "Nmap will scan with --min-rate=5000.\n\n"
+    else
+        speed=""
+        printf "Nmap will use default speed scan, it will not add --min-rate=5000.\n\n"
+    fi
+
+    # Get user input for protocol option
+    printf "Do you want to scan UDP or TCP? "
+    read protocol
+    protocol=$(printf "$protocol" | tr '[:upper:]' '[:lower:]')
+
+    # Get user input for httpx scan option
+    printf "\nDo you want to use httpx to check if open ports are serving websites? "
+    read httpx_scan
+    httpx_scan=$(printf "$httpx_scan" | tr '[:upper:]' '[:lower:]')
+    printf "Will run httpx scan\n\n"
+
+    # Check what protocol user wants to use
+    if [[ "$protocol" == "udp" || "$protocol" == "u" ]]; then
+        protocol="-sU"
+        host_discovery="" 
+        printf "Starting UDP scan.\n\n"
+    else
+        protocol=""
+        host_discovery="-sn"
+        printf "Starting TCP scan.\n\n"
+    fi
 fi
 
 # nmap host discovery 
