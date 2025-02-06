@@ -58,7 +58,7 @@ for ip in $(cat ../../nmap_host-discovery|grep 'scan report'|awk '{print $5}');d
 
 # httpx scan to find ports that are serving websites 
 if [[ "$httpx_scan" == "yes" || "$httpx_scan" == "y" ]]; then
-    for ip in $(cat ../../nmap_host-discovery|grep 'scan report'|awk '{print $5}');do for ports in $(cat ../nmap_65k-ports_$ip|grep open|awk -F '/' '{print $1}'|sed -z 's/\n/,/g'|sed 's/,$//');do /opt/httpx -u $ip -p $ports -title -status-code -follow-redirects -ip -method -o httpx_output_$ip;done;done
+    for ip in $(cat ../../nmap_host-discovery|grep 'scan report'|awk '{print $5}');do for ports in $(cat ../nmap_65k-ports_$ip|grep open|awk -F '/' '{print $1}'|sed -z 's/\n/,/g'|sed 's/,$//');do httpx -u $ip -p $ports -title -status-code -tech-detect -follow-redirects -ip -method -o httpx_output_$ip;done;done
 fi
 
 # Create a directory for each host discovered with open ports, and then move each nmap file output to the target directory.  This is helpful for organizing notes on large subnets
