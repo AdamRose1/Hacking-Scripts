@@ -103,7 +103,7 @@ if [[ "$wfuzz_scan" == "yes" || "$wfuzz_scan" == "y" ]]; then
 
     for ip in $(ls all_targets);do 
     urls=$(cat all_targets/$ip/enumeration/httpx_output_$ip|awk '{print $1}')
-    # urls=$(cat fireprox_url_list.txt) # If IP getting blocked, use fireprox for the urls and then create a file listing the fireprox urls. 
+    # urls=$(cat fireprox_url_list.txt) # If IP getting blocked, use fireprox for the urls, then create a file listing the fireprox urls, then run this wfuzz_scann
     for url in $urls;do 
     host=$(echo $url|awk -F '//' '{print $2}');
     wfuzz -c -w subdomain_list.txt -u "$url" -H "Host: FUZZ.$host" -f all_targets/$ip/enumeration/wfuzz_output_$host;done
