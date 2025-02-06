@@ -1,5 +1,5 @@
 #!/bin/bash
-# Created this script to automate and organize nmap and httpx subnet scanning
+# Created this script to automate and organize nmap and httpx scanning of large networks
 
 # Ask the user if they want to use predefined values or be prompted for input. If predefined, user has to update the predefined values for target,speed,protocol,host_discovery, and httpx_scan.
 printf "Do you want to use predefined values and skip the questions? (y/n): "
