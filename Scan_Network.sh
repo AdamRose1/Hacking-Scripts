@@ -12,7 +12,7 @@ if [[ "$use_predefined" == "y" || "$use_predefined" == "yes" ]]; then
     protocol=""  # Leave empty if you want to use TCP. For UDP enter -sU here.
     host_discovery="-sn" # Leave empty if using UDP protocol
     httpx_scan="yes"
-    wfuzz_scan="no"
+    wfuzz_scan="no" 
 
     printf "Using predefined values. Skipping prompts...\n\n"
 else
@@ -96,13 +96,14 @@ cd ../ && mv all_targets ../../../ && cd ../../../ && rm -rf step1_host-discover
 # If you do not want to create the below empty files in each target IP, then comment out the line below
 for ip in $(ls all_targets);do touch all_targets/$ip/enumeration/enumeration.txt all_targets/$ip/exploit_path.txt all_targets/$ip/creds.txt;done
 
-# wfuzz brute force to try and find virtual host subdomains. To avoid IP getting blocked, add to this script so that -u for wfuzz is a fireprox url to the target url
+# wfuzz brute force to try and find virtual host subdomains.  
 if [[ "$wfuzz_scan" == "yes" || "$wfuzz_scan" == "y" ]]; then
     # To FUZZ large amount of subdomains remove subdomains-top1million-5000.txt.
     for subdomain in $(ls /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt);do cat $subdomain >> temp_subdomain_list;done && sort -uf temp_subdomain_list > subdomain_list.txt && rm temp_subdomain_list
 
     for ip in $(ls all_targets);do 
     urls=$(cat all_targets/$ip/enumeration/httpx_output_$ip|awk '{print $1}')
+    # urls=$(cat fireprox_url_list.txt) # If IP getting blocked, use fireprox for the urls and then create a file listing the fireprox urls. 
     for url in $urls;do 
     host=$(echo $url|awk -F '//' '{print $2}');
     wfuzz -c -w subdomain_list.txt -u "$url" -H "Host: FUZZ.$host" -f all_targets/$ip/enumeration/wfuzz_output_$host;done
