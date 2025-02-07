@@ -99,8 +99,12 @@ for ip in $(ls all_targets);do touch all_targets/$ip/enumeration/enumeration.txt
 # wfuzz brute force to try and find virtual host subdomains.  
 if [[ "$wfuzz_scan" == "yes" || "$wfuzz_scan" == "y" ]]; then
     # To FUZZ large amount of subdomains remove subdomains-top1million-5000.txt.
-    for subdomain in $(ls /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt);do cat /usr/share/seclists/Discovery/DNS/$subdomain >> temp_subdomain_list;done && sort -uf temp_subdomain_list > subdomain_list.txt && rm temp_subdomain_list
-
+    if ! [[ -F subdomain_list.txt ]];then
+    for subdomain in $(ls /usr/share/seclists/Discovery/DNS/);do cat /usr/share/seclists/Discovery/DNS/$subdomain >> temp_subdomain_list;done && sort -uf temp_subdomain_list > 
+    subdomain_list.txt && rm temp_subdomain_list
+    else :
+    fi
+    
     for ip in $(ls all_targets);do 
     urls=$(cat all_targets/$ip/enumeration/httpx_output_$ip|awk '{print $1}')
     # urls=$(cat fireprox_url_list.txt) # If IP getting blocked, use fireprox for the urls, then create a file listing the fireprox urls, then run this wfuzz_scann
