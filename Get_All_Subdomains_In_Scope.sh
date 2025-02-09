@@ -36,20 +36,20 @@ with open("out_of_scope.txt", "r") as oos_file:
             print(f"www.{oos_line}.{target}")
             print(f"{oos_line}.{target}")
         else:
-            pass' > prepare_out_of_scope.py
+            pass' > format_out_of_scope_list.py
 else
-printf 'The file "prepare_out_of_scope.py" already exists. \n'
+printf 'The file "format_out_of_scope_list.py" already exists. \n'
 fi
 
 # Run the python file
-if ! [[ -f out_of_scope_complete ]];then
-python3 prepare_out_of_scope.py >> out_of_scope_complete && cat out_of_scope.txt >>out_of_scope_complete
+if ! [[ -f out_of_scope_complete_list.txt ]];then
+python3 format_out_of_scope_list.py > out_of_scope_complete_list.txt && cat out_of_scope.txt >> out_of_scope_complete_list.txt
 else
-printf 'The file "out_of_scope_complete" already exists.\n'
+printf 'The file "out_of_scope_complete_list.txt" already exists.\n'
 fi
 
 # Eliminate subdomains that scope document listed as out of scope
-cat step3|awk '{print $1}'| while read -r line;do if ! grep -qiw "$line" out_of_scope_complete;then echo $line>> step4;fi;done 
+cat step3|awk '{print $1}'| while read -r line;do if ! grep -qiw "$line" out_of_scope_complete_list.txt;then echo $line>> step4;fi;done 
 
 # First remove duplicates. Next, if dns lookup does not resolve then remove from the in scope list
 cat step4|sort -uf  >> step5 && for target in $(cat step5);do nslookup $target| grep -q "server can't find";if [[ $? -ne 0 ]];then echo $target >> step6;fi;done
