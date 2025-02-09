@@ -1,5 +1,5 @@
 #!/bin/bash
-# Created this script to get all in scope subdomains for the target provided.
+# Created this script to get all in scope subdomains for the target provided. It achieves this by eliminating subdomains that do not match the target scope, CNAME points out of scope, is in the out_of_scope.txt file, dns query does not resolve, or location is outside of the US. 
 # Create a file called "out_of_scope.txt" that contains all the out of scope domains and IP's that were provided.  List each out of scope domain/ip on a seperate line. 
 
 target="example.com" # Update the target value.  Use only domain name, no https:// 
@@ -24,7 +24,7 @@ cat step1 |grep -i "\.$target" > step2
 # Eliminate subdomains that have a CNAME that point to an out of scope domain name
 exclude_t=$(cat step2 |grep -i cname|awk '{print $3}'|grep -iv "$target$");cat step2 |grep -v `echo $exclude_t` > step3
 
-# Make out of scope list match same formating of step3 (sudbdomain list)
+# Make out of scope list match same formating of the step3 (sudbdomain list) file
 if ! [[ -f prepare_out_of_scope.py ]];then
 echo '# #!/usr/bin/env python3
 target="example.com" # only domain name, no https:// 
