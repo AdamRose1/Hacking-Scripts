@@ -1,6 +1,6 @@
 #!/bin/bash
 # Created this script to get all in scope subdomains for the target provided.
-# Create a file called "out_of_scope.txt" that contains all out of scope domains and IP's.  List each out of scope domain/ip on a seperate line. 
+# Create a file called "out_of_scope.txt" that contains all the out of scope domains and IP's that were provided.  List each out of scope domain/ip on a seperate line. 
 
 target="example.com" # Update the target value.  Use only domain name, no https:// 
 
