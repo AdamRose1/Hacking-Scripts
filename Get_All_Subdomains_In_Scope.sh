@@ -1,7 +1,7 @@
 #!/bin/bash
 # Created this script to get all subdomains for the target in scope 
 # Create a file called "out_of_scope.txt" that contains all out of scope domains and IP's.  List each out of scope domain/ip on a seperate line. 
-target="example.com" # only domain name, no https:// 
+target="example.com" # Update the target value.  Use only domain name, no https:// 
 
 if ! [[ -f out_of_scope.txt ]];then
     echo "out_of_scope.txt not found in current working directory"
