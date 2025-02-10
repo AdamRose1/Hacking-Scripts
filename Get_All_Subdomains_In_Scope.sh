@@ -13,10 +13,9 @@ shodan domain $target >> step1
 
 curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u  >>step1
 
-# if ! [[ -f subdomain_list.txt ]];then
-# for subdomain in $(ls /usr/share/seclists/Discovery/DNS/);do cat /usr/share/seclists/Discovery/DNS/$subdomain >> temp_subdomain_list;done && sort -uf temp_subdomain_list > subdomain_list.txt && rm temp_subdomain_list
-# fi
-# dnsenum --enum $target -f subdomain_list.txt -r # If using dnsenum, then need to output into file step1 properly (either manually or by adding scripting for this)
+ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt -u https://FUZZ.$target -s > ffuf_output.txt
+
+for line in $(cat ffuf_output.txt);do echo $line.$target >> step1;done
 
 # Eliminate subdomains that do not match the scope
 cat step1 |grep -i "\.$target" > step2
