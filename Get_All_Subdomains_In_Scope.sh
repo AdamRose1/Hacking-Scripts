@@ -13,7 +13,7 @@ shodan domain $target >> step1
 
 curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u  >>step1
 
-ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt -u https://FUZZ.$target -s > ffuf_output.txt
+ffuf -ic -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt -u https://FUZZ.$target -s > ffuf_output.txt
 
 for line in $(cat ffuf_output.txt);do echo $line.$target >> step1;done
 
