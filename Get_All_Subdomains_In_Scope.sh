@@ -17,7 +17,7 @@ if ! [[ -f subdomain_bf_wordlist.txt ]];then
 cat /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt > a && cat /usr/share/seclists/Discovery/DNS/bitquark-subdomains-top100000.txt >> a && cat a|sort -uf > subdomain_bf_wordlist.txt && rm a
 fi
 
-ffuf -ic -w subdomain_bf_wordlist.txt -u https://FUZZ.$target > ffuf_output.txt
+ffuf -ic -w subdomain_bf_wordlist.txt -u https://FUZZ.$target -s > ffuf_output.txt
 
 cat ffuf_output.txt >> step1
 
