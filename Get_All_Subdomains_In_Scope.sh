@@ -17,15 +17,12 @@ ffuf -ic -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt 
 
 for line in $(cat ffuf_output.txt);do echo $line.$target >> step1;done
 
-# Eliminate subdomains that do not match the scope
-cat step1 |grep -i "\.$target" > step2
-
 # Eliminate subdomains that have a CNAME that point to an out of scope domain name
-exclude_t=$(cat step2 |grep -i cname|awk '{print $3}'|grep -iv "$target$")
+exclude_t=$(cat step1 |grep -i cname|awk '{print $3}'|grep -iv "$target$")
 if [[ -n "$exclude_t" ]];then
-cat step2 |grep -v `echo $exclude_t` > step3
+cat step1 |grep -v `echo $exclude_t` > step2
 else
-cp step2 step3
+cp step1 step2
 fi
 
 # Make out of scope list match same formating of the step3 (sudbdomain list) file
@@ -53,11 +50,11 @@ printf 'The file "out_of_scope_complete_list.txt" already exists.\n'
 fi
 
 # Eliminate subdomains that scope document listed as out of scope
-cat step3|awk '{print $1}'| while read -r line;do if ! grep -qiw "$line" out_of_scope_complete_list.txt;then echo $line>> step4;fi;done 
+cat step2|awk '{print $1}'| while read -r line;do if ! grep -qiw "$line" out_of_scope_complete_list.txt;then echo $line>> step3;fi;done 
 
 # First remove duplicates. Next, if dns lookup does not resolve then remove from the in scope list
-cat step4|sort -uf  >> step5 && for target in $(cat step5);do nslookup $target| grep -q "server can't find";if [[ $? -ne 0 ]];then echo $target >> step6;fi;done
+cat step3|sort -uf  >> step4 && for target in $(cat step4);do nslookup $target| grep -q "server can't find";if [[ $? -ne 0 ]];then echo $target >> step5;fi;done
 
 # Convert from domain name to IP (geoiplookup does not work with domain name) and then do geoip lookup.
 echo 'Whatever is output to the file called step8 means that it is not in the US and is therefore out of scope.' > step8 
-for ip in $(cat step6);do host $ip | grep "address"|awk '{print $NF}' >> step7;done && cat step7 | xargs -I {} geoiplookup {}|grep -v "US\|can't resolve" >> step8 
+for ip in $(cat step5);do host $ip | grep "address"|awk '{print $NF}' >> step6;done && cat step6 | xargs -I {} geoiplookup {}|grep -v "US\|can't resolve" >> step7 
