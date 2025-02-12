@@ -9,7 +9,7 @@ if ! [[ -f out_of_scope.txt ]];then
     exit 1
 fi
 
-shodan domain $target >> step1
+shodan domain -T A,AAAA,CNAME $target >> step1
 
 curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u  >>step1
 
