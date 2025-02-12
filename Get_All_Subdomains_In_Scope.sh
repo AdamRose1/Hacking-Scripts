@@ -13,9 +13,7 @@ shodan domain -T A,AAAA,CNAME $target >> step1
 
 curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u  >>step1
 
-ffuf -ic -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt -u https://FUZZ.$target -s > ffuf_output.txt
-
-for line in $(cat ffuf_output.txt);do echo $line.$target >> step1;done
+ffuf -ic -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt -u https://FUZZ.$target -s >> step1
 
 # Eliminate subdomains that have a CNAME that point to an out of scope domain name
 exclude_t=$(cat step1 |grep -i cname|awk '{print $3}'|grep -iv "$target$")
