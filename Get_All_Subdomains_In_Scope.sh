@@ -58,11 +58,11 @@ printf 'The file "out_of_scope_complete_list.txt" already exists.\n'
 fi
 
 # Eliminate subdomains that scope document listed as out of scope
-cat step2|awk '{print $1}'| while read -r line;do if ! grep -qiw "$line" out_of_scope_complete_list.txt;then echo $line>> step3;fi;done 
+cat step1|awk '{print $1}'| while read -r line;do if ! grep -qiw "$line" out_of_scope_complete_list.txt;then echo $line>> step2;fi;done 
 
 # First remove duplicates. Next, if dns lookup does not resolve then remove from the in scope list
-cat step3|sort -uf  >> step4 && for target in $(cat step4);do nslookup $target| grep -q "server can't find";if [[ $? -ne 0 ]];then echo $target >> step5;fi;done
+cat step2|sort -uf  >> step3 && for target in $(cat step3);do nslookup $target| grep -q "server can't find";if [[ $? -ne 0 ]];then echo $target >> step4;fi;done
 
 # Convert from domain name to IP (geoiplookup does not work with domain name) and then do geoip lookup.
-echo 'Whatever is output to the file called step8 means that it is not in the US and is therefore out of scope.' > step8 
-for ip in $(cat step5);do host $ip | grep "address"|awk '{print $NF}' >> step6;done && cat step6 | xargs -I {} geoiplookup {}|grep -v "US\|can't resolve" >> step7 
+echo 'Whatever is output to this file means that it is not in the US and is therefore out of scope.' > step5 
+for ip in $(cat step4);do host $ip | grep "address"|awk '{print $NF}' >> step5;done && cat step4 | xargs -I {} geoiplookup {}|grep -v "US\|can't resolve" >> step5 
