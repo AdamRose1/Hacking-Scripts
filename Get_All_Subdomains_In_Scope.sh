@@ -11,10 +11,12 @@ fi
 
 shodan domain -T A,AAAA,CNAME $target > shodan_output.txt
 
+# Format shodan subdomains output into the full subdomain name.  Example: shodan outputs test, turn that into test.doesnotexist.com. 
 cat shodan_output.txt | awk -v target=$(echo $target) 'FNR>2 { $1=$1"."target; print }' > step1
 
 curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u  >> crt.sh_output.txt
 
+# Add crt.sh found subdomains into the step1 file if they are not already in the step1 file. 
 cat crt.sh_output.txt|tr -d '*' |while read -r line;do if ! grep -qi "$line" step1;then echo $line >> step1;fi;done
 
 if ! [[ -f subdomain_bf_wordlist.txt ]];then
