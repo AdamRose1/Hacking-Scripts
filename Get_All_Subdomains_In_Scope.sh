@@ -25,7 +25,11 @@ fi
 
 ffuf -ic -w subdomain_bf_wordlist.txt -u https://FUZZ.$target -s > ffuf_output_subdomain_bf.txt
 
-cat ffuf_output_subdomain_bf.txt | sed "s/$/.$target/g" >> step1
+# Format ffuf found subdomains into the full subdomain name.  Example: shodan outputs test, turn that into test.doesnotexist.com. 
+cat ffuf_output_subdomain_bf.txt | sed "s/$/.$target/g" > format_ffuf_output_into_full_subdomains.txt
+
+# Add ffuf found subdomains into the step1 file if they are not already in the step1 file. 
+cat format_ffuf_output_into_full_subdomains.txt |tr -d '*' |while read -r line;do if ! grep -qi "$line" step1;then echo "$line" >> step1;fi;done
 
 # Eliminate subdomains that have a CNAME that point to an out of scope domain name
 exclude_subdomain=$(cat step1 |grep -i cname|awk '{print $3}'|grep -iv "$target$")
