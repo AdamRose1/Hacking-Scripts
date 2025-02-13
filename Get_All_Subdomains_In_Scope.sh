@@ -17,7 +17,7 @@ cat shodan_output.txt | awk -v target=$(echo $target) 'FNR>2 { $1=$1"."target; p
 curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u  >> crt.sh_output.txt
 
 # Add crt.sh found subdomains into the step1 file if they are not already in the step1 file. 
-cat crt.sh_output.txt|tr -d '*' |while read -r line;do if ! grep -qi "$line" step1;then echo $line >> step1;fi;done
+cat crt.sh_output.txt|tr -d '*' |while read -r line;do if ! grep -qiw "$line" step1;then echo $line >> step1;fi;done
 
 if ! [[ -f subdomain_bf_wordlist.txt ]];then
 cat /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt > a && cat /usr/share/seclists/Discovery/DNS/bitquark-subdomains-top100000.txt >> a && cat a|sort -uf > subdomain_bf_wordlist.txt && rm a
@@ -29,7 +29,7 @@ ffuf -ic -w subdomain_bf_wordlist.txt -u https://FUZZ.$target -s > ffuf_output_s
 cat ffuf_output_subdomain_bf.txt | sed "s/$/.$target/g" > format_ffuf_output_into_full_subdomains.txt
 
 # Add ffuf found subdomains into the step1 file if they are not already in the step1 file. 
-cat format_ffuf_output_into_full_subdomains.txt |tr -d '*' |while read -r line;do if ! grep -qi "$line" step1;then echo "$line" >> step1;fi;done
+cat format_ffuf_output_into_full_subdomains.txt |tr -d '*' |while read -r line;do if ! grep -qiw "$line" step1;then echo "$line" >> step1;fi;done
 
 # Eliminate subdomains that have a CNAME that point to an out of scope domain name
 exclude_subdomain=$(cat step1 |grep -i cname|awk '{print $3}'|grep -iv "$target$")
