@@ -19,7 +19,7 @@ fi
 
 ffuf -ic -w subdomain_bf_wordlist.txt -u https://FUZZ.$target -s > ffuf_output_subdomain_bf.txt
 
-cat ffuf_output_subdomain_bf.txt | sed -z "s/\b\w\+\b/&.$target/g" >> step1
+cat ffuf_output_subdomain_bf.txt | sed "s/$/.$target/g" >> step1
 
 # Eliminate subdomains that have a CNAME that point to an out of scope domain name
 exclude_subdomain=$(cat step1 |grep -i cname|awk '{print $3}'|grep -iv "$target$")
