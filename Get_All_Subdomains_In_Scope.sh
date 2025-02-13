@@ -13,8 +13,7 @@ fi
 shodan domain -T A,AAAA $target |awk '{print $1}'| awk -v target=$(echo $target) 'FNR>2 { $1=$1"."target; print }' > shodan_output.txt
 
 # Use shodan to get subdomains that have a CNAME that points do a domain in scope. This gets rid of the subdomains that have a CNAME that point to an out of scope domain name. 
-shodan domain -T CNAME $target|grep -i CNAME |grep -i "$target$" |awk '{print $1}'|awk -v target=$(echo $target) '{ $1=$1"."target; print }' >> shodan_output.txt
-shodan domain -T CNAME $target|grep -i CNAME |grep -i "$target$" |awk '{print $3}'|awk -v target=$(echo $target) '{ $1=$1"."target; print }' >> shodan_output.txt
+shodan domain -T CNAME $target|grep -i CNAME |grep -i "$target$" |awk '{print $1; print $3}'|awk -v target=$(echo $target) '{ $1=$1"."target; print }' >> shodan_output.txt
 
 cat shodan_output.txt|sort -uf > step1
 
