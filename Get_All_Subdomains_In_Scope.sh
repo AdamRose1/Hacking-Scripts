@@ -15,14 +15,12 @@ shodan domain -T A,AAAA $target |awk '{print $1}'| awk -v target=$(echo $target)
 # Use shodan to get subdomains that have a CNAME that points do a domain in scope. This gets rid of the subdomains that have a CNAME that point to an out of scope domain name. 
 shodan domain -T CNAME $target|grep -i CNAME |grep -i "$target$" |awk '{print $1; print $3}'|awk -v target=$(echo $target) '{ $1=$1"."target; print }' >> shodan_output.txt
 
-cat shodan_output.txt|sort -uf > step1
 
-# Crt.sh to get subdomains for the target
-curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u  >> crt.sh_output.txt
+# crt.sh to get subdomains for the target
+curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u |grep -v '*' >> crt.sh_output.txt
 
-# Add crt.sh found subdomains into the step1 file if they are not already in the step1 file. 
-cat crt.sh_output.txt|tr -d '*' |while read -r line;do if ! grep -qiw "$line" step1;then echo $line >> step1;fi;done
 
+# ffuf
 if ! [[ -f subdomain_bf_wordlist.txt ]];then
 cat /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt > a && cat /usr/share/seclists/Discovery/DNS/bitquark-subdomains-top100000.txt >> a && cat a|sort -uf > subdomain_bf_wordlist.txt && rm a
 fi
@@ -32,8 +30,8 @@ ffuf -ic -w subdomain_bf_wordlist.txt -u https://FUZZ.$target -s > ffuf_output_s
 # Format ffuf found subdomains into the full subdomain name.  Example: shodan outputs test, turn that into test.doesnotexist.com. 
 cat ffuf_output_subdomain_bf.txt | sed "s/$/.$target/g" > format_ffuf_output_into_full_subdomains.txt
 
-# Add ffuf found subdomains into the step1 file if they are not already in the step1 file. 
-cat format_ffuf_output_into_full_subdomains.txt |tr -d '*' |while read -r line;do if ! grep -qiw "$line" step1;then echo "$line" >> step1;fi;done
+# Creat a file that contains all found subdomains and removes any duplicate subdomains found.
+cat shodan_output.txt crt.sh_output.txt format_ffuf_output_into_full_subdomains.txt | sort -uf > step1
 
 # Make out of scope list match same formating of the step3 (sudbdomain list) file
 if ! [[ -f format_out_of_scope.py ]];then
