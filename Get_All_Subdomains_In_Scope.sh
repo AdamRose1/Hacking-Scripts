@@ -13,8 +13,7 @@ fi
 shodan domain -T A,AAAA $target |awk '{print $1}'| awk -v target=$(echo $target) 'FNR>2 { $1=$1"."target; print }' > shodan_output.txt
 
 # Use shodan to get subdomains that have a CNAME that points do a domain in scope. This gets rid of the subdomains that have a CNAME that point to an out of scope domain name. 
-shodan domain -T CNAME $target|grep -i CNAME |grep -i "$target$" |awk '{print $1; print $3}'|awk -v target=$(echo $target) '{ $1=$1"."target; print }' >> shodan_output.txt
-
+shodan domain -T CNAME $target |grep -i "$target$" |awk -v target=$(echo $target) 'FNR>1 {print $1=$1"."target; print $3}'
 
 # crt.sh to get subdomains for the target
 curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u |grep -v '*' >> crt.sh_output.txt
@@ -46,9 +45,9 @@ cat out_of_scope.txt >> formatted_out_of_scope.txt
 cat step1 | while read -r line;do if ! grep -qix "$line" formatted_out_of_scope.txt;then echo $line>> step2;fi;done 
 #for line in $(cat step1);do if ! grep -qix $line formatted_out_of_scope.txt;then echo $line >> step2;fi;done # another way to do the above line
 
-# First remove duplicates. Next, if dns lookup does not resolve then remove from the in scope list
-cat step2|sort -uf  >> step3 && for target in $(cat step3);do nslookup $target| grep -q "server can't find";if [[ $? -ne 0 ]];then echo $target >> step4;fi;done
+# If dns lookup does not resolve then remove from the subdomain from the in scope list found in the file step2
+for subd in $(cat step2);do nslookup_ouptut=$(nslookup "$subd");if [[ ! "$nslookup_output" =~ "server can't find" ]];then echo $subd >> step3;fi;done
 
 # Convert from domain name to IP (geoiplookup does not work with domain name) and then do geoip lookup.
 echo 'Whatever is output to this file means that it is not in the US and is therefore out of scope.' > step5 
-for ip in $(cat step4);do host $ip | grep "address"|awk '{print $NF}' >> step5;done && cat step4 | xargs -I {} geoiplookup {}|grep -v "US\|can't resolve" >> step5 
+for ip in $(cat step3);do host $ip | grep "address"|awk '{print $NF}' >> step4;done && cat step4 | xargs -I {} geoiplookup {}|grep -v "US\|can't resolve" >> step5 
