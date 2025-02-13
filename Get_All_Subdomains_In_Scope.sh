@@ -2,7 +2,7 @@
 # Created this script to get all in scope subdomains for the target provided. It achieves this by eliminating subdomains that do not match the target scope, CNAME points out of scope, is in the out_of_scope.txt file, dns query does not resolve, or location is outside of the US. 
 # Create a file called "out_of_scope.txt" that contains all the out of scope domains and IP's that were provided.  List each out of scope domain/ip on a seperate line. 
 
-target="doesnotexist.com" # Update the scope target value.  Use only domain name, no https:// 
+target="doesnotexist.com" # Update the target value both here and in the python script below.  Use only domain name, no https:// 
 
 if ! [[ -f out_of_scope.txt ]];then
     echo "out_of_scope.txt not found in current working directory"
