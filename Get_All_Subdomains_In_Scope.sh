@@ -20,7 +20,7 @@ shodan domain -T CNAME $target|grep -i CNAME |grep -i "$target$" |awk '{print $1
 curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u |grep -v '*' >> crt.sh_output.txt
 
 
-# ffuf
+# ffuf subdomain brute force
 if ! [[ -f subdomain_bf_wordlist.txt ]];then
 cat /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt > a && cat /usr/share/seclists/Discovery/DNS/bitquark-subdomains-top100000.txt >> a && cat a|sort -uf > subdomain_bf_wordlist.txt && rm a
 fi
@@ -29,6 +29,10 @@ ffuf -ic -w subdomain_bf_wordlist.txt -u https://FUZZ.$target -s > ffuf_output_s
 
 # Format ffuf found subdomains into the full subdomain name.  Example: shodan outputs test, turn that into test.doesnotexist.com. 
 cat ffuf_output_subdomain_bf.txt | sed "s/$/.$target/g" > format_ffuf_output_into_full_subdomains.txt
+
+
+# wfuzz virtual host subdomain brute force (run manually because need to get the correct filter of --hh)
+# wfuzz -c -w subdomain_bf_wordlist.txt -u "https://$target" -H "Host: FUZZ.$target" --hh <value> | tee wfuzz_output_subdomain_bf.txt
 
 # Creat a file that contains all found subdomains and removes any duplicate subdomains found.
 cat shodan_output.txt crt.sh_output.txt format_ffuf_output_into_full_subdomains.txt | sort -uf > step1
