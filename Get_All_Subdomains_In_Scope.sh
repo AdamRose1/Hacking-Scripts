@@ -13,7 +13,9 @@ shodan domain -T A,AAAA,CNAME $target > shodan_output.txt
 
 cat shodan_output.txt | awk -v target=$(echo $target) 'FNR>2 { $1=$1"."target; print }' > step1
 
-curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u  >>step1
+curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u  >> crt.sh_output.txt
+
+cat crt.sh_output.txt|tr -d '*' |while read -r line;do if ! grep -qi "$line" step1;then echo $line >> step1;fi;done
 
 if ! [[ -f subdomain_bf_wordlist.txt ]];then
 cat /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt > a && cat /usr/share/seclists/Discovery/DNS/bitquark-subdomains-top100000.txt >> a && cat a|sort -uf > subdomain_bf_wordlist.txt && rm a
