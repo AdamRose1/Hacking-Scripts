@@ -2,25 +2,23 @@
 # Created this script to get all in scope subdomains for the target provided. It achieves this by eliminating subdomains that do not match the target scope, CNAME points out of scope, is in the out_of_scope.txt file, dns query does not resolve, or location is outside of the US. 
 # Create a file called "out_of_scope.txt" that contains all the out of scope domains and IP's that were provided.  List each out of scope domain/ip on a seperate line. 
 
-target="doesnotexist.com" # Update the target value.  Use only domain name, no https:// 
+target="doesnotexist.com" # Update the scope target value.  Use only domain name, no https:// 
 
 if ! [[ -f out_of_scope.txt ]];then
     echo "out_of_scope.txt not found in current working directory"
     exit 1
 fi
 
+# Shodan to get subdomains for the target and then format the output into the full subdomain name. Example: shodan outputs test, turn that into test.doesnotexist.com. 
+shodan domain -T A,AAAA $target |awk '{print $1}'| awk -v target=$(echo $target) 'FNR>2 { $1=$1"."target; print }' > shodan_output.txt
 
-# Get subdomains for the target with shodan
-shodan domain -T A,AAAA $target > shodan_output.txt
+# Use shodan to get subdomains that have a CNAME that points do a domain in scope. This gets rid of the subdomains that have a CNAME that point to an out of scope domain name. 
+shodan domain -T CNAME $target|grep -i CNAME |grep -i "$target$" |awk '{print $1}'|awk -v target=$(echo $target) '{ $1=$1"."target; print }' >> shodan_output.txt
+shodan domain -T CNAME $target|grep -i CNAME |grep -i "$target$" |awk '{print $3}'|awk -v target=$(echo $target) '{ $1=$1"."target; print }' >> shodan_output.txt
 
-# Get CNAME that points to the target domain. This gets rid of the subdomains that have a CNAME that point to an out of scope domain name. 
-shodan domain -T CNAME $target|grep -i CNAME |grep -i "$target$" >> shodan_output.txt
+cat shodan_output.txt|sort -uf > step1
 
-# Format shodan subdomains output into the full subdomain name.  Example: shodan outputs test, turn that into test.doesnotexist.com. 
-cat shodan_output.txt | awk -v target=$(echo $target) 'FNR>2 { $1=$1"."target; print }' > step1
-
-
-
+# Crt.sh to get subdomains for the target
 curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u  >> crt.sh_output.txt
 
 # Add crt.sh found subdomains into the step1 file if they are not already in the step1 file. 
