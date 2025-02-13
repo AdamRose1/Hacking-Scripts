@@ -9,10 +9,17 @@ if ! [[ -f out_of_scope.txt ]];then
     exit 1
 fi
 
-shodan domain -T A,AAAA,CNAME $target > shodan_output.txt
+
+# Get subdomains for the target with shodan
+shodan domain -T A,AAAA $target > shodan_output.txt
+
+# Get CNAME that points to the target domain. This gets rid of the subdomains that have a CNAME that point to an out of scope domain name. 
+shodan domain -T CNAME $target|grep -i CNAME |grep -i "$target$" >> shodan_output.txt
 
 # Format shodan subdomains output into the full subdomain name.  Example: shodan outputs test, turn that into test.doesnotexist.com. 
 cat shodan_output.txt | awk -v target=$(echo $target) 'FNR>2 { $1=$1"."target; print }' > step1
+
+
 
 curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u  >> crt.sh_output.txt
 
@@ -30,14 +37,6 @@ cat ffuf_output_subdomain_bf.txt | sed "s/$/.$target/g" > format_ffuf_output_int
 
 # Add ffuf found subdomains into the step1 file if they are not already in the step1 file. 
 cat format_ffuf_output_into_full_subdomains.txt |tr -d '*' |while read -r line;do if ! grep -qiw "$line" step1;then echo "$line" >> step1;fi;done
-
-# Eliminate subdomains that have a CNAME that point to an out of scope domain name
-exclude_subdomain=$(cat step1 |grep -i cname|awk '{print $3}'|grep -iv "$target$")
-if [[ -n "$exclude_subdomain" ]];then
-cat step1 |grep -v `echo $exclude_subdomain` > step2
-else
-cp step1 step2
-fi
 
 # Make out of scope list match same formating of the step3 (sudbdomain list) file
 if ! [[ -f format_out_of_scope.py ]];then
