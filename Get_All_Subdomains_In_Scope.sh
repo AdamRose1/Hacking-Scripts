@@ -37,32 +37,14 @@ cat ffuf_output_subdomain_bf.txt | sed "s/$/.$target/g" > format_ffuf_output_int
 # Creat a file that contains all found subdomains and removes any duplicate subdomains found.
 cat shodan_output.txt crt.sh_output.txt format_ffuf_output_into_full_subdomains.txt | sort -uf > step1
 
-# Make out of scope list match same formating of the step3 (sudbdomain list) file
-if ! [[ -f format_out_of_scope.py ]];then
-echo '# #!/usr/bin/env python3
-target="example.com" # only domain name, no https:// 
-with open("out_of_scope.txt", "r") as oos_file:
-    oos_content = oos_file.read()
-    oos_lines = oos_content.splitlines()
-    for oos_line in oos_lines:
-        if not oos_line[0].isdigit():
-            print(f"www.{oos_line}.{target}")
-            print(f"{oos_line}.{target}")
-        else:
-            pass' > format_out_of_scope_list.py
-else
-printf 'The file "format_out_of_scope_list.py" already exists. \n'
-fi
-
-# Run the python file
-if ! [[ -f out_of_scope_complete_list.txt ]];then
-python3 format_out_of_scope_list.py > out_of_scope_complete_list.txt && cat out_of_scope.txt >> out_of_scope_complete_list.txt
-else
-printf 'The file "out_of_scope_complete_list.txt" already exists.\n'
-fi
+# Make out_of_scope.txt list match same formating of the step1 (sudbdomain list) file so that grep elminiates out of scope domains correctly
+cat out_of_scope.txt | awk -v target=$(echo $target) '{print $1="www."$1"."target}' > formatted_out_of_scope.txt
+cat out_of_scope.txt | awk -v target=$(echo $target) '{print $1=$1"."target}' >> formatted_out_of_scope.txt
+cat out_of_scope.txt >> formatted_out_of_scope.txt
 
 # Eliminate subdomains that scope document listed as out of scope
-cat step1|awk '{print $1}'| while read -r line;do if ! grep -qiw "$line" out_of_scope_complete_list.txt;then echo $line>> step2;fi;done 
+cat step1 | while read -r line;do if ! grep -qix "$line" formatted_out_of_scope.txt;then echo $line>> step2;fi;done 
+#for line in $(cat step1);do if ! grep -qix $line formatted_out_of_scope.txt;then echo $line >> step2;fi;done # another way to do the above line
 
 # First remove duplicates. Next, if dns lookup does not resolve then remove from the in scope list
 cat step2|sort -uf  >> step3 && for target in $(cat step3);do nslookup $target| grep -q "server can't find";if [[ $? -ne 0 ]];then echo $target >> step4;fi;done
