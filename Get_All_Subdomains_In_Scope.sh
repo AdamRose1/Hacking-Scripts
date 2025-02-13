@@ -48,7 +48,8 @@ cat step1 | while read -r line;do if ! grep -qix "$line" formatted_out_of_scope.
 for subd in $(cat step2);do nslookup_output=$(nslookup "$subd");if [[ ! "$nslookup_output" =~ "server can't find" ]];then echo $subd >> step3;fi;done
 
 # Remove any subdomain in the list that has a CNAME pointing out of scope
-for ip in $(cat step3);do if dig "$ip"|grep -qi cname|awk '{print $5}'| sed 's/\.$//g' | grep -qi $target;then echo $ip >>step4; elif ! dig "$ip" | grep -qi cname > /dev/null; then echo $ip >> step4; fi;done
+for ip in $(cat step3);do if dig "$ip"|grep -qi cname|awk '{print $5}'| sed 's/\.$//g' | grep -qi $target;then echo $ip >>step4
+elif ! dig "$ip" | grep -qi cname > /dev/null; then echo $ip >> step4; fi;done
 
 # Convert from domain name to IP (geoiplookup does not work with domain name) and then do geoip lookup.
 echo 'Whatever is output to this file means that it is not in the US and is therefore out of scope.' > step6 
