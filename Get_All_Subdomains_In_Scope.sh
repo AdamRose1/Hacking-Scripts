@@ -51,19 +51,18 @@ for subd in $(cat step2);do nslookup_output=$(nslookup "$subd");if [[ ! "$nslook
 for ip in $(cat step3);do if dig "$ip"|grep -qi cname|awk '{print $NF}'| sed 's/\.$//g' | grep -qi $target;then echo $ip >>step4
 elif ! dig "$ip" | grep -qi cname > /dev/null; then echo $ip >> step4; fi;done
 
-# Convert from domain name to IP (geoiplookup does not work with domain name) and then do geoip lookup.
-for ip in $(cat step4); do
-  host $ip | grep "address" | awk '{print $NF}' | while read ip_addr; do
-    echo -n "IP: $ip_addr   " >> step5
+# Convert from domain name to IP (geoiplookup does not work with domain name) and then do geoiplookup on each IP.
+for subd in $(cat step4); do
+  dig $subd +short A | while read ip_addr; do
+    echo -n "IP: $subd  $ip_addr   " >> step5
     geoiplookup $ip_addr >> step5
   done
 done
 
-# Only retain the IP's that are in the US.
+# Only retain the IP's that are confirmed to be in the US (geoiplookup will not find private IP's and will therefore not be retained).
 cat step5|while IFS= read -r line;do if echo "$line" | grep -qi "United States";then echo $line| awk '{print $2}' >> step6
 else echo $line;fi;done
 
-# Turn the US IP list back into subdomain names
-for ip in $(cat step6);do host $ip|awk '{print $NF}'|sed 's/\.$//g' >> step7;done
+
 
 
