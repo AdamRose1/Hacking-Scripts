@@ -54,7 +54,10 @@ elif ! dig "$ip" | grep -qi cname > /dev/null; then echo $ip >> step4; fi;done
 # Convert from domain name to IP (geoiplookup does not work with domain name) and then do geoip lookup.
 for ip in $(cat step4); do
   host $ip | grep "address" | awk '{print $NF}' | while read ip_addr; do
-    echo -n "IP: $ip_addr" >> step5
+    echo -n "IP: $ip_addr   " >> step5
     geoiplookup $ip_addr >> step5
   done
 done
+
+cat step5|while IFS= read -r line;do if echo "$line" | grep -qi "United States";then echo $line| awk '{print $2}' >> all-subdomains-found_inscope_resolve_inUS.txt
+else echo $line;fi;done
