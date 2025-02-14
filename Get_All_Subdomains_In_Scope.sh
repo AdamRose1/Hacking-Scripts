@@ -59,10 +59,7 @@ for subd in $(cat step4); do
   done
 done
 
-# Only retain the IP's that are confirmed to be in the US (geoiplookup will not find private IP's and will therefore not be retained).
+# Only retain the IP's that are confirmed to be in the US (geoiplookup will not find private IP's and therefore will not retain those IP's either).
 cat step5|while IFS= read -r line;do if echo "$line" | grep -qi "United States";then echo $line| awk '{print $2}' >> step6
 else echo $line;fi;done
-
-
-
 
