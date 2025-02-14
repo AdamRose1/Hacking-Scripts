@@ -8,7 +8,7 @@ use_predefined=$(printf "$use_predefined" | tr '[:upper:]' '[:lower:]')
 if [[ "$use_predefined" == "y" || "$use_predefined" == "yes" ]]; then
 
     target="-iL /home/test/inscope.txt"
-    speed="--min-rate=1000"
+    speed="" # If left blank then nmap will use the default speed
     protocol=""  # Leave empty if you want to use TCP. For UDP enter -sU here.
     host_discovery="-sn" # Change to empty if using UDP protocol
     httpx_scan="yes"
