@@ -59,5 +59,11 @@ for ip in $(cat step4); do
   done
 done
 
-cat step5|while IFS= read -r line;do if echo "$line" | grep -qi "United States";then echo $line| awk '{print $2}' >> all-subdomains-found_inscope_resolve_inUS.txt
+# Only retain the IP's that are in the US.
+cat step5|while IFS= read -r line;do if echo "$line" | grep -qi "United States";then echo $line| awk '{print $2}' >> step6
 else echo $line;fi;done
+
+# Turn the US IP list back into subdomain names
+for ip in $(cat step6);do host $ip|awk '{print $NF}'|sed 's/\.$//g' >> step7;done
+
+
