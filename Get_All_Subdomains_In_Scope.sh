@@ -70,4 +70,4 @@ done
 cat step5|while IFS= read -r line;do if echo "$line" | grep -qi "United States";then echo $line| awk '{print $2}' >> step6
 else echo $line >> bogon_ips_identified.txt;fi;done
 
-cat step6 | sort -uf >> step7
+cat step6 | sort -uf >> step7-final_results
