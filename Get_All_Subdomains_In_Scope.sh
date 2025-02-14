@@ -51,15 +51,23 @@ for subd in $(cat step2);do nslookup_output=$(nslookup "$subd");if [[ ! "$nslook
 for ip in $(cat step3);do if dig "$ip"|grep -qi cname|awk '{print $NF}'| sed 's/\.$//g' | grep -qi $target;then echo $ip >>step4
 elif ! dig "$ip" | grep -qi cname > /dev/null; then echo $ip >> step4; fi;done
 
-# Convert from domain name to IP (geoiplookup does not work with domain name) and then do geoiplookup on each IP.
+# Convert from domain name to IP (geoiplookup does not work with domain name) and then do geoiplookup on each IP. 
 for subd in $(cat step4); do
-  dig $subd +short A | while read ip_addr; do
+  dig +short A $subd | while read ip_addr; do
     echo -n "IP: $subd  $ip_addr   " >> step5
     geoiplookup $ip_addr >> step5
   done
 done
 
+for subd in $(cat step4); do
+  dig +short AAAA $subd | while read ip_addr6; do
+    echo -n "IP: $subd  $ip_addr6   " >> step5
+    geoiplookup6 $ip_addr6 >> step5
+  done
+done
+
 # Only retain the IP's that are confirmed to be in the US (geoiplookup will not find private IP's and therefore will not retain those IP's either).
 cat step5|while IFS= read -r line;do if echo "$line" | grep -qi "United States";then echo $line| awk '{print $2}' >> step6
-else echo $line;fi;done
+else echo $line >> bogon_ips_identified.txt;fi;done
 
+cat step6 | sort -uf >> step7
