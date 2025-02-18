@@ -19,7 +19,7 @@ sudo nmap $target $host_discovery $speed $protocol -oN nmap_host-discovery
 mkdir step2_65k-find-open-ports && cd step2_65k-find-open-ports
 for ip in $(cat ../nmap_host-discovery|grep 'scan report' | awk '{print $5}');do sudo nmap -Pn $ports_to_scan $ip $speed $protocol -oN nmap_ports_$ip;done
 
-# nmap version and script scanning for every open port
+# nmap version and script scanning for every open port. This will eliminate any hosts that have no open ports bc it will not write a file for a host that has no open ports. 
 mkdir step3_sCV && cd step3_sCV
 for ip in $(cat ../../nmap_host-discovery|grep 'scan report'|awk '{print $5}');do for ports in $(cat ../nmap_ports_$ip|grep open|awk -F '/' '{print $1}'|sed -z 's/\n/,/g'|sed 's/,$//');do sudo nmap -Pn $ip $speed $protocol -p $ports -sCV -oN nmap_sCV_$ip;done;done
 
