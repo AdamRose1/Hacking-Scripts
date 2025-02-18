@@ -28,7 +28,7 @@ for ip in $(cat ../../nmap_host-discovery|grep 'scan report'|awk '{print $5}');d
 if [[ "$httpx_scan" == "yes" || "$httpx_scan" == "y" ]]; then
     if [[ "httpx_scan_with_screenshot" == "yes" || "httpx_scan_with_screenshot" =="y" ]];then
         for ip in $(cat ../../nmap_host-discovery|grep 'scan report'|awk '{print $5}');do echo $ip >> httpx_targets.txt;done
-        for ports in $(cat ../nmap_ports_$ip|grep open|awk -F '/' '{print $1}'|sed -z 's/\n/,/g'|sed 's/,$//');do httpx -l httpx_targets.txt -p $ports -ss -title -status-code -tech-detect -follow-redirects -ip -method;done && mv output/screenshot/ ../../../../httpx_output_all_targets_screenshots
+        for ports in $(cat ../nmap_ports_$ip|grep open|awk -F '/' '{print $1}'|sed -z 's/\n/,/g'|sed 's/,$//');do httpx -l httpx_targets.txt -p $ports -ss -title -status-code -tech-detect -follow-redirects -ip -method;done && mv output/screenshot/ ../../../httpx_output_all_targets_screenshots
     else :
     
     for ip in $(cat ../../nmap_host-discovery|grep 'scan report'|awk '{print $5}');do for ports in $(cat ../nmap_ports_$ip|grep open|awk -F '/' '{print $1}'|sed -z 's/\n/,/g'|sed 's/,$//');do httpx  
