@@ -51,7 +51,7 @@ for subd in $(cat step2);do nslookup_output=$(nslookup "$subd");if [[ ! "$nslook
 # Remove any subdomain in the list that has a CNAME pointing out of scope and place them into a seperate file.
 for ip in $(cat step3);do if dig "$ip"|grep -i cname|awk '{print $NF}'| sed 's/\.$//g' | grep -qi $target;then echo $ip >>step4
 elif ! dig "$ip" | grep -i cname > /dev/null; then echo $ip >> step4 
-elif dig "$ip"|grep -i cname|awk '{print $NF}'| sed 's/\.$//g' | grep -qiv $target;then echo $ip > CNAMES_out_of_scope_crt_ffuf-bf.txt
+elif dig "$ip"|grep -i cname|awk '{print $NF}'| sed 's/\.$//g' | grep -qiv $target;then echo $ip >> CNAMES_out_of_scope_crt_ffuf-bf.txt
 else :
 fi;done
 
