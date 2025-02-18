@@ -55,9 +55,6 @@ elif dig "$ip"|grep -i cname|awk '{print $NF}'| sed 's/\.$//g' | grep -qiv $targ
 else :
 fi;done
 
-# Eliminate duplicates for out of scope CNAMES.
-cat CNAMES_out_of_scope_shodan.txt CNAMES_out_of_scope_crt_ffuf-bf.txt  | sort -uf > CNAMES_out_of_scope.txt
-
 # Convert from domain name to IP (geoiplookup does not work with domain name) and then do geoiplookup on each IP. 
 for subd in $(cat step4); do
   dig +short A $subd | while read ip_addr; do
@@ -77,4 +74,7 @@ done
 cat step5|while IFS= read -r line;do if echo "$line" | grep -qi "United States";then echo $line| awk '{print $2}' >> step6
 else echo $line >> bogon_ips_identified.txt;fi;done
 
-cat step6 | sort -uf >> step7-final_results
+# Eliminate duplicates and organize final results
+mkdir final_results
+cat CNAMES_out_of_scope_shodan.txt CNAMES_out_of_scope_crt_ffuf-bf.txt  | sort -uf > final_results/CNAMES_out_of_scope.txt
+cat step6 | sort -uf >> final_results/In_scope_subdomains_found.txt
