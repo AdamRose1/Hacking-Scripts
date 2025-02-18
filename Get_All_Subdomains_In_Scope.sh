@@ -14,7 +14,7 @@ shodan domain -T A,AAAA $target |awk '{print $1}'| awk -v target=$(echo $target)
 
 # Use shodan to get subdomains that have a CNAME in scope. This removes the subdomains that have a CNAME that point to an out of scope domain name and puts them into a seperate file. 
 shodan domain -T CNAME $target |grep -i "$target$" |awk -v target=$(echo $target) 'FNR>1 {print $1=$1"."target; print $3}' >> shodan_output.txt
-shodan domain -T CNAME $target |grep -iv "$target$" |awk -v target=$(echo $target) 'FNR>1 {print $1=$1"."target; print $3}' >> CNAMES_out_of_scope.txt
+shodan domain -T CNAME $target |grep -iv "$target$" |awk -v target=$(echo $target) 'FNR>1 {print $1=$1"."target; print $3}' > CNAMES_out_of_scope_shodan.txt
 
 # crt.sh to get subdomains for the target
 curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u |grep -v '*' >> crt.sh_output.txt
@@ -50,7 +50,13 @@ for subd in $(cat step2);do nslookup_output=$(nslookup "$subd");if [[ ! "$nslook
 
 # Remove any subdomain in the list that has a CNAME pointing out of scope and place them into a seperate file.
 for ip in $(cat step3);do if dig "$ip"|grep -i cname|awk '{print $NF}'| sed 's/\.$//g' | grep -qi $target;then echo $ip >>step4
-elif ! dig "$ip" | grep -i cname > /dev/null; then echo $ip >> step4; elif dig "$ip"|grep -i cname|awk '{print $NF}'| sed 's/\.$//g' | grep -qiv $target;then echo $ip >> CNAMES_out_of_scope.txt;else :;fi;done
+elif ! dig "$ip" | grep -i cname > /dev/null; then echo $ip >> step4 
+elif dig "$ip"|grep -i cname|awk '{print $NF}'| sed 's/\.$//g' | grep -qiv $target;then echo $ip > CNAMES_out_of_scope_crt_ffuf-bf.txt
+else :
+fi;done
+
+# Eliminate duplicates for out of scope CNAMES.
+cat CNAMES_out_of_scope_shodan.txt CNAMES_out_of_scope_crt_ffuf-bf.txt  | sort -uf > CNAMES_out_of_scope.txt
 
 # Convert from domain name to IP (geoiplookup does not work with domain name) and then do geoiplookup on each IP. 
 for subd in $(cat step4); do
