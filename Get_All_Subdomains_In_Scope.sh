@@ -12,8 +12,9 @@ fi
 # Shodan to get subdomains for the target and then format the output into the full subdomain name. Example: shodan outputs test, turn that into test.doesnotexist.com. 
 shodan domain -T A,AAAA $target |awk '{print $1}'| awk -v target=$(echo $target) 'FNR>2 {$1=$1"."target; print}' > shodan_output.txt
 
-# Use shodan to get subdomains that have a CNAME that points do a domain in scope. This gets rid of the subdomains that have a CNAME that point to an out of scope domain name. 
+# Use shodan to get subdomains that have a CNAME in scope. This removes the subdomains that have a CNAME that point to an out of scope domain name and puts them into a seperate file. 
 shodan domain -T CNAME $target |grep -i "$target$" |awk -v target=$(echo $target) 'FNR>1 {print $1=$1"."target; print $3}' >> shodan_output.txt
+shodan domain -T CNAME $target |grep -iv "$target$" >> CNAMES_out_of_scope.txt
 
 # crt.sh to get subdomains for the target
 curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u |grep -v '*' >> crt.sh_output.txt
@@ -47,9 +48,9 @@ cat step1 | while read -r line;do if ! grep -qix "$line" formatted_out_of_scope.
 # If dns lookup does not resolve then remove from the subdomain from the in scope list found in the file step2
 for subd in $(cat step2);do nslookup_output=$(nslookup "$subd");if [[ ! "$nslookup_output" =~ "server can't find" ]];then echo $subd >> step3;fi;done
 
-# Remove any subdomain in the list that has a CNAME pointing out of scope
-for ip in $(cat step3);do if dig "$ip"|grep -qi cname|awk '{print $NF}'| sed 's/\.$//g' | grep -qi $target;then echo $ip >>step4
-elif ! dig "$ip" | grep -qi cname > /dev/null; then echo $ip >> step4; fi;done
+# Remove any subdomain in the list that has a CNAME pointing out of scope and place them into a seperate file.
+for ip in $(cat step3);do if dig "$ip"|grep -i cname|awk '{print $NF}'| sed 's/\.$//g' | grep -qi $target;then echo $ip >>step4
+elif ! dig "$ip" | grep -i cname > /dev/null; then echo $ip >> step4; elif dig "$ip"|grep -i cname|awk '{print $NF}'| sed 's/\.$//g' | grep -qiv $target;then echo $ip >> CNAMES_out_of_scope.txt;else :;fi;done
 
 # Convert from domain name to IP (geoiplookup does not work with domain name) and then do geoiplookup on each IP. 
 for subd in $(cat step4); do
