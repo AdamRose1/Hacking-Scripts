@@ -14,7 +14,7 @@ shodan domain -T A,AAAA $target |awk '{print $1}'| awk -v target=$(echo $target)
 
 # Use shodan to get subdomains that have a CNAME in scope. This removes the subdomains that have a CNAME that point to an out of scope domain name and puts them into a seperate file. 
 shodan domain -T CNAME $target |grep -i "$target$" |awk -v target=$(echo $target) 'FNR>1 {print $1=$1"."target; print $3}' >> shodan_output.txt
-shodan domain -T CNAME $target |grep -iv "$target$" >> CNAMES_out_of_scope.txt
+shodan domain -T CNAME $target |grep -iv "$target$" |awk -v target=$(echo $target) 'FNR>1 {print $1=$1"."target; print $3}' >> CNAMES_out_of_scope.txt
 
 # crt.sh to get subdomains for the target
 curl -s "https://crt.sh/?q=$target&output=json" | jq -r '.[] | select(.name_value)|.name_value'|sort -u |grep -v '*' >> crt.sh_output.txt
