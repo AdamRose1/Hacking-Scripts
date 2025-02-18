@@ -32,7 +32,7 @@ fi
 mkdir all_targets && cd all_targets
 for ip in $(ls ../nmap*|awk -F '_' '{print $3}');do mkdir -p $ip/enumeration && cp ../nmap_sCV_$ip ../httpx_output_$ip $ip/enumeration/;done
 
-# Organize
+# Organize, not deleting the step1-3 directories so that issues can be debugged if needed
 cd ../ && mv all_targets ../../../ && cd ../../../
 
 # If you do not want to create the below empty files in each target IP, then comment out the line below
