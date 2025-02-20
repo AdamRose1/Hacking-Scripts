@@ -27,16 +27,15 @@ for ip in $(cat ../../nmap_host-discovery|grep 'scan report'|awk '{print $5}');d
 httpx_scan=$(echo "$httpx_scan"| tr '[:upper:]' '[:lower:]')
 
 if [[ "$httpx_scan" == "yes" || "$httpx_scan" == "y" ]]; then  
-    for ip in $(cat ../../nmap_host-discovery|grep 'scan report'|awk '{print $5}');do for ports in $(cat ../nmap_ports_$ip|grep open|awk -F '/' '{print $1}'|sed -z 's/\n/,/g'|sed 's/,$//');do httpx -u $ip -p $ports -title -status-code -tech-detect -follow-redirects -ip -method -o httpx_output_$ip -ss;done;done 
-    mv output/screenshot/ ../../../httpx_output_all_targets_screenshots
-    
-    # Create a directory for each host discovered with open ports, and then move each nmap and httpx file ouptut to the target directory. This is helpful for organizing notes on large subnets
-    mkdir all_targets && cd all_targets
-    for ip in $(ls ../nmap*|awk -F '_' '{print $3}');do mkdir -p $ip/enumeration && cp ../nmap_sCV_$ip ../httpx_output_$ip $ip/enumeration/;done
+for ip in $(cat ../../nmap_host-discovery|grep 'scan report'|awk '{print $5}');do for ports in $(cat ../nmap_ports_$ip|grep open|awk -F '/' '{print $1}'|sed -z 's/\n/,/g'|sed 's/,$//');do httpx -u $ip -p $ports -title -status-code -tech-detect -follow-redirects -ip -method -o httpx_output_$ip -ss;done;done 
+mv output/screenshot/ ../../../httpx_output_all_targets_screenshots
+# Create a directory for each host discovered with open ports, and then move each nmap and httpx file ouptut to the target directory. This is helpful for organizing notes on large subnets
+mkdir all_targets && cd all_targets
+for ip in $(ls ../nmap*|awk -F '_' '{print $3}');do mkdir -p $ip/enumeration && cp ../nmap_sCV_$ip ../httpx_output_$ip $ip/enumeration/;done
 else
-    # Create a directory for each host discovered with open ports, and then move each nmap file output to the target directory.  This is helpful for organizing notes on large subnets
-    mkdir all_targets && cd all_targets
-    for ip in $(ls ../nmap*|awk -F '_' '{print $3}');do mkdir -p $ip/enumeration && cp ../nmap_sCV_$ip $ip/enumeration/;done
+# Create a directory for each host discovered with open ports, and then move each nmap file output to the target directory.  This is helpful for organizing notes on large subnets
+mkdir all_targets && cd all_targets
+for ip in $(ls ../nmap*|awk -F '_' '{print $3}');do mkdir -p $ip/enumeration && cp ../nmap_sCV_$ip $ip/enumeration/;done
 fi
 
 # Organize final results
