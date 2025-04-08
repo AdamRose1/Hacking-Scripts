@@ -1,8 +1,9 @@
 #!/bin/bash
 # Created this script to find all in scope subdomains for the target provided. This is achieved by by using shodan, crt.sh, subdomain brute force, and virtual host brute force to find all subdomains under the target scope, and then eliminating subdomains that do not match the target scope, CNAME points out of scope, is in the out_of_scope.txt file, dns query does not resolve, or location is outside of the US. 
 # Create a file called "out_of_scope.txt" that contains all the out of scope domains and IP's that were provided.  List each out of scope domain/ip on a seperate line. 
+# Run shodan init <api_key>
 
-target="doesnotexist.com" # Update the target value both here and in the python script below.  Use only domain name, no https:// 
+target="doesnotexist.com" # Update the target value using the domain name only (no https://)
 
 if ! [[ -f out_of_scope.txt ]];then
     echo "out_of_scope.txt not found in current working directory"
