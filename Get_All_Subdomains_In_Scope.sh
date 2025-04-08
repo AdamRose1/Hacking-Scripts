@@ -80,5 +80,5 @@ cat possible_bogon_ips_identified.txt|grep -qi "IP Address not found" > bogon_ip
 
 # Eliminate duplicates and organize final results
 mkdir final_results
-cat CNAMES_out_of_scope_shodan.txt CNAMES_out_of_scope_crt_ffuf-bf.txt  | sort -uf > final_results/CNAMES_out_of_scope.txt
+cat CNAMES_out_of_scope_shodan.txt CNAMES_out_of_scope_crt_ffuf-bf.txt  | sort -uf > final_results/these_domains_pointing_to_out_of_scope_CNAMES.txt
 cat step6 | sort -uf >> final_results/In_scope_subdomains_found.txt
