@@ -31,7 +31,7 @@ ffuf -ic -w subdomain_bf_wordlist.txt -u https://FUZZ.$target -s > ffuf_output_s
 cat ffuf_output_subdomain_bf.txt | sed "s/$/.$target/g" > format_ffuf_output_into_full_subdomains.txt
 
 
-# wfuzz virtual host subdomain brute force (run manually because need to get the correct filter of --hh)
+# wfuzz virtual host subdomain brute force (run manually because need to get the correct filter of --hh and can get blocked because of the heavy traffic it sends)
 # wfuzz -c -w subdomain_bf_wordlist.txt -u "https://$target" -H "Host: FUZZ.$target" --hh <value> | tee wfuzz_output_subdomain_bf.txt
 
 # Creat a file that contains all found subdomains and removes any duplicate subdomains found.
