@@ -34,7 +34,7 @@ cat ffuf_output_subdomain_bf.txt | sed "s/$/.$target/g" > format_ffuf_output_int
 # wfuzz virtual host subdomain brute force (run manually because need to get the correct filter of --hh and can get blocked because of the heavy traffic it sends)
 # wfuzz -c -w subdomain_bf_wordlist.txt -u "https://$target" -H "Host: FUZZ.$target" --hh <value> | tee wfuzz_output_subdomain_bf.txt
 
-# Creat a file that contains all found subdomains and removes any duplicate subdomains found.
+# Create a file that contains all found subdomains and removes any duplicate subdomains found.
 cat shodan_output.txt crt.sh_output.txt format_ffuf_output_into_full_subdomains.txt | sort -uf > step1
 
 # Make out_of_scope.txt list match same formating of the step1 (sudbdomain list) file so that grep elminiates out of scope domains correctly
@@ -73,7 +73,10 @@ done
 
 # Only retain the IP's that are confirmed to be in the US (geoiplookup will not find private IP's and therefore will not retain those IP's either).
 cat step5|while IFS= read -r line;do if echo "$line" | grep -qi "United States";then echo $line| awk '{print $2}' >> step6
-else echo $line >> bogon_ips_identified.txt;fi;done
+else echo $line >> possible_bogon_ips_identified.txt;fi;done 
+
+# If a domain resolves to an IP but geoiplookup cannot find the address then it is very likely a bogon ip. Therefore, if geoiplookup returned "IP address not found" then it is a bogon ip because before doing geoiplookup we checked that the domain does resolve. 
+cat possible_bogon_ips_identified.txt|grep -qi "IP Address not found" > bogon_ips_identified.txt
 
 # Eliminate duplicates and organize final results
 mkdir final_results
