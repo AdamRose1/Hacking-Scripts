@@ -2,7 +2,7 @@
 # Created this script to automate and organize nmap and httpx scanning of large networks. Run this in tmux
 
 # Update these variable before running the script. 
-target="-iL /must/be/full/path/step7-final_results"
+target="-iL /must/be/full/path/to/final_results_all_ips_and_subdomains_in_scope"
 speed="" # If left blank then nmap will use the default speed
 protocol=""  # Leave empty if you want to use TCP. For UDP enter -sU here.
 host_discovery="-sn" # Change to empty if using UDP protocol
