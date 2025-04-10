@@ -67,7 +67,7 @@ done
 for subdomain in $(cat find_subdomains_in_scope/step2-all_found_subdomains_after_removing_subdomains_that_have_outofscope_domains.txt);do nslookup_output=$(nslookup "$subdomain");if [[ ! "${nslookup_output,,}" == *"can't find"* ]];then echo $subdomain >> find_subdomains_in_scope/step3-all_found_subdomains_after_removing_nonresolving_IPs.txt;fi;done
 
 # Remove subdomains that are not based in the US
-for subdomain in $(cat find_subdomains_in_scope/step3-all_found_subdomains_after_removing_nonresolving_IPs.txt); do geoip=$(dig +short A "$subdomain" |tail -n 1 | xargs -I {} geoiplookup {});if echo "$geoip" | grep -qi "US, United States";then echo "$subdomain" >> find_subdomains_in_scope/finalresults-step4--all_found_subdomains_that_are_US_based.txt;else echo "$subdomain: $geoip" >> find_subdomains_in_scope/step4-all_found_subdomains_that_did_not_return_as_US_based.txt;fi;done
+for subdomain in $(cat find_subdomains_in_scope/step3-all_found_subdomains_after_removing_nonresolving_IPs.txt); do geoip=$(dig +short A "$subdomain" |tail -n 1 | xargs -I {} geoiplookup {});if echo "$geoip" | grep -qi "US, United States";then echo "$subdomain" >> find_subdomains_in_scope/finalresults-all_found_subdomains_that_are_US_based_and_inscope.txt;else echo "$subdomain: $geoip" >> find_subdomains_in_scope/step4-all_found_subdomains_that_did_not_return_as_US_based.txt;fi;done
 
 
 # Section 3 FFUF
