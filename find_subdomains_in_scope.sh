@@ -75,14 +75,13 @@ for subdomain in $(cat find_subdomains_in_scope/step3-all_found_subdomains_after
 
 # Create the wordlist
 if ! [[ -f subdomain_bf_wordlist.txt ]];then
-cat /usr/share/seclists/Discovery/DNS/dns-Jhaddix.txt|grep -v '[a-zA-z0-9]' > a && cat /usr/share/seclists/Discovery/DNS/bug-bounty-program-subdomains-trickest-inventory.txt >> a && cat /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt >> a && cat /usr/share/seclists/Discovery/DNS/bitquark-subdomains-top100000.txt >> a && sort -uf a > find_subdomains_in_scope/subdomain_bf_wordlist.txt && rm a
+cat /usr/share/seclists/Discovery/DNS/dns-Jhaddix.txt > a && cat /usr/share/seclists/Discovery/DNS/bug-bounty-program-subdomains-trickest-inventory.txt >> a && cat /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt >> a && cat /usr/share/seclists/Discovery/DNS/bitquark-subdomains-top100000.txt >> a && sort -uf a > find_subdomains_in_scope/subdomain_bf_wordlist.txt && rm a
 fi
 
-# The awk below is used to print out the full domain found (otherwise it only prints the found subdomain which is not helpful if multiple targets are used in this ffuf command since we won't know which domain is associated to the found domain) 
-for target in $(cat in_scope_target_list.txt);do ffuf -ic -w find_subdomains_in_scope/subdomain_bf_wordlist.txt -u "https://FUZZ.$target" >> find_subdomains_in_scope/ffuf_output_"$target"_subdomains.txt;done 
+mkdir find_subdomains_in_scope/ffuf_output && for target in $(cat in_scope_target_list.txt);do ffuf -ic -w find_subdomains_in_scope/subdomain_bf_wordlist.txt -u "https://FUZZ.$target" >> "find_subdomains_in_scope/ffuf_output/$target";done
 
-# still working on below
-cat > ffuf_output_subdomain.txt
+# Still working on below
+for file in $(ls ffuf_output);do cat ffuf_output/"$file" >> ffuf_output_subdomain.txt
 
 
 
