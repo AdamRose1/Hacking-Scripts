@@ -57,17 +57,17 @@ for subdomain in $(cat find_subdomains_in_scope/step1-all_found_subdomains_after
     echo "$out_of_scope" | while IFS= read -r line_out_of_scope; do
     is_it_out_of_scope=false
     if ! [[ "$subdomain" == *"$line_out_of_scope" ]]; then
-        echo "$subdomain" >> find_subdomains_in_scope/step2-all_found_subdomains_after_removing_subdomains_that_have_outofscope_domains.txt
+        echo "$subdomain" >> find_subdomains_in_scope/step2-all_found_subdomains_after_removing_subdomains_that_have_outofscope_CNAMES_and_domains.txt
         break
     fi
     done
 done
 
 # Remove subdomains that do not resolve to an IP. The ${,,} part is to convert the nslookup_output variable into lowercase because Can't is sometimes uppercase 'C' and sometimes lower case 'c'. 
-for subdomain in $(cat find_subdomains_in_scope/step2-all_found_subdomains_after_removing_subdomains_that_have_outofscope_domains.txt);do nslookup_output=$(nslookup "$subdomain");if [[ ! "${nslookup_output,,}" == *"can't find"* ]];then echo $subdomain >> find_subdomains_in_scope/step3-all_found_subdomains_after_removing_nonresolving_IPs.txt;fi;done
+for subdomain in $(cat find_subdomains_in_scope/step2-all_found_subdomains_after_removing_subdomains_that_have_outofscope_CNAMES_and_domains.txt);do nslookup_output=$(nslookup "$subdomain");if [[ ! "${nslookup_output,,}" == *"can't find"* ]];then echo $subdomain >> find_subdomains_in_scope/step3-all_found_subdomains_after_removing_outofscope_CNAMES_domains_and_nonresolving_IPs.txt;fi;done
 
 # Remove subdomains that are not based in the US
-for subdomain in $(cat find_subdomains_in_scope/step3-all_found_subdomains_after_removing_nonresolving_IPs.txt); do geoip=$(dig +short A "$subdomain" |tail -n 1 | xargs -I {} geoiplookup {});if echo "$geoip" | grep -qi "US, United States";then echo "$subdomain" >> find_subdomains_in_scope/finalresults-all_found_subdomains_that_are_US_based_and_inscope.txt;else echo "$subdomain: $geoip" >> find_subdomains_in_scope/step4-all_found_subdomains_that_did_not_return_as_US_based.txt;fi;done
+for subdomain in $(cat find_subdomains_in_scope/step3-all_found_subdomains_after_removing_outofscope_CNAMES_domains_and_nonresolving_IPs.txt); do geoip=$(dig +short A "$subdomain" |tail -n 1 | xargs -I {} geoiplookup {});if echo "$geoip" | grep -qi "US, United States";then echo "$subdomain" >> find_subdomains_in_scope/finalresults-all_found_subdomains_that_are_US_based_and_inscope.txt;else echo "$subdomain: $geoip" >> find_subdomains_in_scope/step4-all_found_subdomains_that_did_not_return_as_US_based.txt;fi;done
 
 
 # Section 3 FFUF
@@ -110,14 +110,14 @@ for subdomain in $(cat find_subdomains_in_scope/ffuf_output_after_removing_subdo
     echo "$out_of_scope" | while IFS= read -r line_out_of_scope; do
     is_it_out_of_scope=false
     if ! [[ "$subdomain" == *"$line_out_of_scope" ]]; then
-        echo "$subdomain" >> find_subdomains_in_scope/ffuf_output_after_removing_subdomains_that_have_outofscope_domains.txt
+        echo "$subdomain" >> find_subdomains_in_scope/ffuf_output_step2_after_removing_subdomains_that_have_outofscope_CNAMES_and_domains.txt
         break
     fi
     done
 done
 
 # Remove subdomains that do not resolve to an IP. The ${,,} part is to convert the nslookup_output variable into lowercase because Can't is sometimes uppercase 'C' and sometimes lower case 'c'. 
-for subdomain in $(cat find_subdomains_in_scope/ffuf_output_after_removing_subdomains_that_have_outofscope_domains.txt);do nslookup_output=$(nslookup "$subdomain");if [[ ! "${nslookup_output,,}" == *"can't find"* ]];then echo $subdomain >> find_subdomains_in_scope/ffuf_output_after_removing_nonresolving_IPs.txt;fi;done
+for subdomain in $(cat find_subdomains_in_scope/ffuf_output_step2_after_removing_subdomains_that_have_outofscope_CNAMES_and_domains.txt);do nslookup_output=$(nslookup "$subdomain");if [[ ! "${nslookup_output,,}" == *"can't find"* ]];then echo $subdomain >> find_subdomains_in_scope/ffuf_output_step3_after_removing_CNAMES_domains_and_nonresolving_IPs.txt;fi;done
 
 # Remove subdomains that are not based in the US
-for subdomain in $(cat find_subdomains_in_scope/ffuf_output_after_removing_nonresolving_IPs.txt); do geoip=$(dig +short A "$subdomain" |tail -n 1 | xargs -I {} geoiplookup {});if echo "$geoip" | grep -qi "US, United States";then echo "$subdomain" >> find_subdomains_in_scope/ffuf_output_finalresults_that_are_US_based.txt;else echo "$subdomain: $geoip" >> find_subdomains_in_scope/ffuf_output-step4-all_found_subdomains_that_did_not_return_as_US_based.txt;fi;done
+for subdomain in $(cat find_subdomains_in_scope/ffuf_output_step3_after_removing_CNAMES_domains_and_nonresolving_IPs.txt); do geoip=$(dig +short A "$subdomain" |tail -n 1 | xargs -I {} geoiplookup {});if echo "$geoip" | grep -qi "US, United States";then echo "$subdomain" >> find_subdomains_in_scope/ffuf_output_finalresults_that_are_US_based.txt;else echo "$subdomain: $geoip" >> find_subdomains_in_scope/ffuf_output-step4-all_found_subdomains_that_did_not_return_as_US_based.txt;fi;done
