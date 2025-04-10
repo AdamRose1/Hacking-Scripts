@@ -29,7 +29,7 @@ for target in $(cat in_scope_target_list.txt);do curl -s "https://crt.sh/?q=$tar
 cat find_subdomains_in_scope/shodan_output > find_subdomains_in_scope/temp && cat find_subdomains_in_scope/crt.sh_output.txt >> find_subdomains_in_scope/temp && sort -uf find_subdomains_in_scope/temp > find_subdomains_in_scope/all_found_subdomains_before_checking_if_they_are_inscope.txt && rm find_subdomains_in_scope/temp 
 
 
-# Section 2: Remove out of scope subdomains --> still need to fix the grep for word ending in both places below for CNAME and outofscope checks
+# Section 2: Remove out of scope subdomains
 
 # Remove subdomains that have out of scope CNAMES. The dig command below is being used in a way that it extracts the final CNAME.  This way we avoid using CNAME that may not be the final CNAME and can cause incorrect results.  For example, if domain example.com has CNAME of test.com, and test.com has CNAME of somethingelse.com then to ensure it is in scope we must check the final CNAME and not the in between CNAMES. 
 inscope_cnames=$(cat CNAMES_inscope.txt)
