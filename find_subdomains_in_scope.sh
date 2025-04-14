@@ -74,7 +74,7 @@ for subdomain in $(cat find_subdomains_in_scope/step3-all_found_subdomains_after
 # Ffuf is put in a section of its own because fuff subdomain brute force with a huge wordlist will take a very lot of time, therefore this is done at the end so that we can start testing with results from the beginning part of thes cript while this finishes running. 
 
 # Create the wordlist
-if ! [[ -f subdomain_bf_wordlist.txt ]];then
+if ! [[ -f find_subdomains_in_scope/subdomain_bf_wordlist.txt ]];then
 cat /usr/share/seclists/Discovery/DNS/dns-Jhaddix.txt > a && cat /usr/share/seclists/Discovery/DNS/bug-bounty-program-subdomains-trickest-inventory.txt >> a && cat /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt >> a && cat /usr/share/seclists/Discovery/DNS/bitquark-subdomains-top100000.txt >> a && sort -uf a > find_subdomains_in_scope/subdomain_bf_wordlist.txt && rm a
 fi
 
