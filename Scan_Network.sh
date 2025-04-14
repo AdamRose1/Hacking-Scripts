@@ -41,3 +41,6 @@ fi
 # Organize final results
 cd ../ && mv all_targets ../../../ && cd ../../../
 for ip in $(ls all_targets);do touch all_targets/$ip/enumeration/enumeration.txt all_targets/$ip/exploit_path.txt all_targets/$ip/creds.txt;done
+
+
+# for subdomain in $(cat finalresults-step4--all_found_subdomains_that_are_US_based.txt);do dig +short A "$subdomain" |tail -n 1 | xargs -I {} shodan host {} > shodan_host_$subdomain.txt && mv shodan_host_$subdomain.txt all_targets/$subdomain;done
