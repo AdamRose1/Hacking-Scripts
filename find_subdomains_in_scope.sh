@@ -82,7 +82,7 @@ fi
 mkdir find_subdomains_in_scope/ffuf_output && for target in $(cat in_scope_target_list.txt);do ffuf -ic -w find_subdomains_in_scope/subdomain_bf_wordlist.txt -u "https://FUZZ.$target" >> "find_subdomains_in_scope/ffuf_output/$target";done
 
 # Create one list of all subdomain brute force ffuf subdomains found.  The reason first putting ffuf output into seperate files for each domain in scope is because ffuf output only shows the subdomain found but not the domain it was found for. 
-for file in $(ls find_subdomains_in_scope/ffuf_output);do cat "find_subdomains_in_scope/ffuf_output/$file" |awk '{print $1}' >> find_subdomains_in_scope/ffuf_output_subdomains.txt;done
+for file in $(ls find_subdomains_in_scope/ffuf_output);do cat "find_subdomains_in_scope/ffuf_output/$file" | awk -v target=$(echo $file) '{print $1=$1"."target}' | sort -uf >> find_subdomains_in_scope/ffuf_output_subdomains.txt;done
 
 # Repeat section 2 on the ffuf output to perform the same checks to remove anything that is out of scope or not based in the US
 inscope_cnames=$(cat CNAMES_inscope.txt)
