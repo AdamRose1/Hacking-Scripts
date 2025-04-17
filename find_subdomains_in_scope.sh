@@ -67,7 +67,7 @@ done
 for subdomain in $(cat find_subdomains_in_scope/step2-all_found_subdomains_after_removing_subdomains_that_have_outofscope_CNAMES_and_domains.txt);do nslookup_output=$(nslookup "$subdomain");if [[ ! "${nslookup_output,,}" == *"can't find"* ]];then echo $subdomain >> find_subdomains_in_scope/step3-all_found_subdomains_after_removing_outofscope_CNAMES_domains_and_nonresolving_IPs.txt;fi;done
 
 # Remove subdomains that are not based in the US
-for subdomain in $(cat find_subdomains_in_scope/step3-all_found_subdomains_after_removing_outofscope_CNAMES_domains_and_nonresolving_IPs.txt); do geoip=$(geoiplookup "$subdomain");if echo "$geoip" | grep -qi "US, United States";then echo "$subdomain" >> find_subdomains_in_scope/finalresults-all_found_subdomains_after_removing_outofscope_CNAMES_domains_nonresolving_IPs_and_are_US_based.txt;else echo "$subdomain: $geoip" >> find_subdomains_in_scope/step4-all_found_subdomains_that_did_not_return_as_US_based.txt;fi;done
+for subdomain in $(cat find_subdomains_in_scope/step3-all_found_subdomains_after_removing_outofscope_CNAMES_domains_and_nonresolving_IPs.txt); do geoip=$(geoiplookup "$subdomain");if echo "$geoip" | grep -qi "US, United States";then echo "$subdomain" >> find_subdomains_in_scope/step4-all_found_subdomains_after_removing_outofscope_CNAMES_domains_nonresolving_IPs_and_are_US_based.txt;else echo "$subdomain: $geoip" >> find_subdomains_in_scope/step4-all_found_subdomains_that_did_not_return_as_US_based.txt;fi;done
 # If want to convert subddomain name to IP address before doing geoiplookup so that you do a geoiplookup on the IP address and not the domain name then replace the line of: geoip=$(geoiplookup "$subdomain") with: geoip=$(dig +short A "$subdomain" |tail -n 1 | xargs -I {} geoiplookup {})
 
 # Section 3 FFUF
@@ -121,3 +121,8 @@ for subdomain in $(cat find_subdomains_in_scope/ffuf_output_step2_after_removing
 
 # Remove subdomains that are not based in the US
 for subdomain in $(cat find_subdomains_in_scope/ffuf_output_step3_after_removing_CNAMES_domains_and_nonresolving_IPs.txt); do geoip=$(geoiplookup "$subdomain");if echo "$geoip" | grep -qi "US, United States";then echo "$subdomain" >> find_subdomains_in_scope/ffuf_output_finalresults_after_removing_CNAMES_domains_and_nonresolving_IPs_and_are_US_based.txt;else echo "$subdomain: $geoip" >> find_subdomains_in_scope/ffuf_output-step4-all_found_subdomains_that_did_not_return_as_US_based.txt;fi;done
+
+# Create file that includes all final results of unique subdomains found from both the first part of this script (before ffuf) and from ffuf subdomain brute force.
+cat find_subdomains_in_scope/ffuf_output_finalresults_after_removing_CNAMES_domains_and_nonresolving_IPs_and_are_US_based.txt > temp_file && cat find_subdomains_in_scope/step4-all_found_subdomains_after_removing_outofscope_CNAMES_domains_nonresolving_IPs_and_are_US_based.txt >> temp_file && cat temp_file |sort -uf > final_results_all_founds_subdomains.txt && rm temp_file
+
+
